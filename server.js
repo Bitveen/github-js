@@ -5,8 +5,8 @@ var http = require('http');
 var fs   = require('fs');
 var path = require('path');
 
-
 var port = process.env.PORT || 8080;
+var pathToPublic = './public';
 
 var server = http.createServer(function(req, res) {
     if (req.url === '/') {
@@ -41,7 +41,7 @@ function serveStatic(req, res) {
 }
 
 function serveHtml(res) {
-    fs.readFile('public/templates/index.html', function(err, fileData) {
+    fs.readFile('public/templates/layout.html', function(err, fileData) {
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.write(fileData);
         res.end();
@@ -62,6 +62,14 @@ function getFileMimeType(extension) {
     }
     return type;
 }
+
+
+function handle404(){}
+function handleHtml(){}
+function handleJs(){}
+function handleCss(){}
+
+
 
 server.listen(port, function() {
     console.log('Server listening on ' + port);

@@ -1,0 +1,120 @@
+.profile {}
+
+.profile-header {
+  text-align: center;
+}
+
+.profile-tabs {
+  margin-top: 50px;
+  font-size: 0;
+  text-align: center;
+  &__container {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid #ddd;
+  }
+
+  &__item {
+    display: inline-block;
+    margin-right: 5px;
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  &__link {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 14px;
+    text-decoration: none;
+    color: #6383A8;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    &:hover {
+      background-color: #f6f6f6;
+    }
+    &_active {
+      background-color: #f6f6f6;
+      border-top: 1px solid #ddd;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      padding-top: 9px;
+
+    }
+
+  }
+
+}
+.profile-content {
+  margin-top: 30px;
+  &__avatar-container {
+    box-sizing: border-box;
+    float: left;
+    width: 50%;
+    position: relative;
+    padding-left: 15px;
+    text-align: center;
+  }
+  &__avatar {
+    max-width: 100%;
+  }
+
+  &__main-info {
+    float: left;
+    box-sizing: border-box;
+    width: 50%;
+    position: relative;
+  }
+
+  &__main-info-item {
+    font-size: 14px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: 15px;
+    &:after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+  }
+
+  &__main-info-label {
+    float: left;
+    text-align: right;
+    width: 40%;
+    box-sizing: border-box;
+  }
+  &__main-info-value {
+    font-weight: bold;
+    float: left;
+    width: 60%;
+    padding-left: 15px;
+    box-sizing: border-box;
+  }
+  &__users-empty {
+    text-align: center;
+  }
+
+}
+
+
+.users-list {
+  padding: 0;
+  list-style: none;
+  width: 400px;
+  margin: 0 auto;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  &__item {
+  }
+  &__link {
+    color: #6383A8;
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    &:hover {
+      background-color: #f1f1f1;
+    }
+  }
+}

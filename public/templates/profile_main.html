@@ -1,0 +1,61 @@
+<div class="profile">
+    <div class="profile-tabs">
+        <ul class="profile-tabs__container">
+            <li class="profile-tabs__item"><a class="profile-tabs__link profile-tabs__link_active" href="#/profile/{{userLogin}}/main">Основная информация</a></li>
+            <li class="profile-tabs__item"><a class="profile-tabs__link" href="#/profile/{{userLogin}}/followers">Подписчики</a></li>
+            <li class="profile-tabs__item"><a class="profile-tabs__link" href="#/profile/{{userLogin}}/followings">Подписки</a></li>
+            <li class="profile-tabs__item"><a class="profile-tabs__link" href="#/profile/{{userLogin}}/repositories">Репозитории</a></li>
+        </ul>
+    </div>
+    <div class="profile-content">
+
+        <div class="profile-content__avatar-container">
+            <img class="profile-content__avatar" src="{{avatar}}" alt="Аватар">
+        </div>
+
+        <div class="profile-content__main-info">
+            <div class="profile-content__main-info-item">
+                <div class="profile-content__main-info-label">
+                    Имя:
+                </div>
+                <div class="profile-content__main-info-value">
+                    {{name}}
+                </div>
+            </div>
+            <div class="profile-content__main-info-item">
+                <div class="profile-content__main-info-label">
+                    Компания:
+                </div>
+                <div class="profile-content__main-info-value">
+                    {{company}}
+                </div>
+            </div>
+            <div class="profile-content__main-info-item">
+                <div class="profile-content__main-info-label">
+                    Количество репозиториев:
+                </div>
+                <div class="profile-content__main-info-value">
+                    {{repositoryCount}}
+                </div>
+            </div>
+            <div class="profile-content__main-info-item">
+                <div class="profile-content__main-info-label">
+                    Количество гистов:
+                </div>
+                <div class="profile-content__main-info-value">
+                    {{gistCount}}
+                </div>
+            </div>
+            <div class="profile-content__main-info-item">
+                <div class="profile-content__main-info-label">
+                    Количество подписок:
+                </div>
+                <div class="profile-content__main-info-value">
+                    {{followingsCount}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
