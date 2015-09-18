@@ -36,11 +36,6 @@
     }
     &_active {
       background-color: #f6f6f6;
-      border-top: 1px solid #ddd;
-      border-left: 1px solid #ddd;
-      border-right: 1px solid #ddd;
-      padding-top: 9px;
-
     }
 
   }
@@ -115,6 +110,28 @@
     text-decoration: none;
     &:hover {
       background-color: #f1f1f1;
+    }
+  }
+}
+.repository-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  &__item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px;
+  }
+  &__title {
+    display: block;
+  }
+  &__link {
+    color: #6383A8;
+    &:visited {
+      color: #6383A8;
+    }
+    &:link {
+      color: #6383A8;
     }
   }
 }
