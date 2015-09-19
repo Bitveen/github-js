@@ -16,9 +16,55 @@ var Application = (function() {
 var StateManager = (function() {
 
 
-    var controller = null;
-    var viewContainer = document.getElementById('viewContainer');
-    var userLogin;
+    var currentState = null;
+
+    var states = [
+        {
+            Name: 'search',
+            Title: 'Поиск пользователей',
+            Pattern: /^#\/$/,
+            Controller: SearchController
+        },
+        {
+            Name: 'profile.main',
+            Title: 'Основная информация',
+            Pattern: /^#\/profile\/([0-9]+)\/main\/?$/,
+            Controller: ProfileMainController
+        },
+        {
+            Name: 'profile.followers',
+            Title: 'Подписчики',
+            Pattern: /^#\/profile\/([0-9]+)\/followers\/?$/,
+            Controller: ProfileFollowersController
+        },
+        {
+            Name: 'profile.followings',
+            Title: 'Подписки',
+            Pattern: /^#\/profile\/([0-9]+)\/followings\/?$/,
+            Controller: ProfileFollowingsController
+        },
+        {
+            Name: 'profile.repositories',
+            Title: 'Репозитории',
+            Pattern: /^#\/profile\/([0-9]+)\/repositories\/?$/,
+            Controller: ProfileRepositoriesController
+        }
+    ];
+
+
+
+    // определение текущего стейта из доступных по хэшу
+    var setCurrentState = function() {
+        for (var i = 0; i < states.length; i++) {
+            if (states[i].Pattern.test(location.hash)) {
+                currentState = states[i];
+                break;
+            }
+            currentState = null;
+        }
+    };
+
+
     var makeUserList = function(userList) {
         var usersArea = document.getElementById('usersArea');
         if (userList.length > 0) {
@@ -30,7 +76,7 @@ var StateManager = (function() {
 
             userList.forEach(function(user) {
                 a = document.createElement('a');
-                a.href = '#/profile/' + user.login + '/main';
+                a.href = '#/profile/' + user.id + '/main';
                 a.className = 'users-list__link';
                 a.appendChild(document.createTextNode(user.login));
                 li = document.createElement('li');
@@ -50,35 +96,99 @@ var StateManager = (function() {
 
 
     };
+    var viewContainer = document.getElementById('viewContainer');
+    var currentPageTitle = document.getElementById('currentPageTitle');
 
-
-
-    var profilePatternMain = /#\/profile\/([a-zA-z0-9]+)\/main/;
-    var profilePatternFollowers = /#\/profile\/([a-zA-z0-9]+)\/followers/;
-    var profilePatternFollowings = /#\/profile\/([a-zA-z0-9]+)\/followings/;
-    var profilePatternRepositories = /#\/profile\/([a-zA-z0-9]+)\/repositories/;
+    /*var profilePatternMain =
+    var profilePatternFollowers = /#\/profile\/([0-9]+)\/followers/;
+    var profilePatternFollowings = /#\/profile\/([0-9]+)\/followings/;
+    var profilePatternRepositories = /#\/profile\/([0-9]+)\/repositories/;*/
 
 
     var stateHandler = function() {
-        if (location.hash == '#/') {
+        setCurrentState();
+        var controller;
+        if (currentState) {
+            controller = new currentState.Controller(currentState);
+        } else {
+            controller = new NotFoundController();
+        }
+
+        if (controller.hasOwnProperty('getData')) {
+
+            controller.getData(function(receivedData) {
+                controller.data = receivedData;
+                controller.loadTemplate(controller.templatePath, function(template) {
+                    viewContainer.innerHTML = controller.parseTemplate(template, {
+                        userId: RegExp.$1
+                    });
+
+                    if (controller.data instanceof Array) {
+                        // это значит, что нужно проверить размер,
+                        // если он равен нулю, то выводить что пусто
+
+
+                        if (controller.data.length == 0) {
+                            //ничего не найдено
+                            var contentArea = document.getElementById('contentArea');
+                            var p = document.createElement('p');
+                            p.className = 'profile-content__users-empty';
+                            p.appendChild(document.createTextNode('Пользователи отсутствуют.'));
+                            contentArea.appendChild(p);
+
+                        } else {
+                            //делаем список
+                            console.log('Has Data');
+                        }
+
+
+
+                    }
+
+
+
+
+
+
+
+
+                });
+            });
+        } else {
+            controller.loadTemplate(controller.templatePath, function(template) {
+                viewContainer.innerHTML = template;
+            });
+        }
+
+
+
+
+
+
+
+
+
+
+
+/*        if (location.hash == '#/') {
             controller = null;
             controller = new SearchController();
+            currentPageTitle.innerHTML = 'Поиск пользователей';
             controller.loadTemplate('/templates/search.html', function(template) {
                 viewContainer.innerHTML = template;
             });
 
 
         } else if (profilePatternMain.test(location.hash)) {
-            /* Основная инфа */
             controller = null;
             controller = new ProfileController();
 
-            userLogin = RegExp.$1;
-
-            Users.getInfo(userLogin, function(data) {
+            userId = RegExp.$1;
+            currentPageTitle.innerHTML = 'Основная информация';
+            Users.getInfo(userId, function(data) {
                 controller.loadTemplate('/templates/profile_main.html', function(template) {
                     viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userLogin: userLogin,
+                        userId: userId,
                         avatar: data.avatar_url,
                         name: data.name || 'Не указано',
                         company: data.company || 'Не указано',
@@ -95,18 +205,21 @@ var StateManager = (function() {
 
 
         } else if (profilePatternFollowers.test(location.hash)) {
-            /* Подписчики */
+
             controller = null;
             controller = new ProfileController();
 
-            userLogin = RegExp.$1;
-
-            Users.getFollowers(userLogin, function(data) {
+            userId = RegExp.$1;
+            currentPageTitle.innerHTML = 'Подписчики';
+            Users.getFollowers(userId, function(data) {
                 controller.loadTemplate('/templates/profile_followers.html', function(template) {
                     viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userLogin: userLogin
+                        userId: userId
                     });
                     makeUserList(data);
+
+
+
                 });
 
 
@@ -118,16 +231,16 @@ var StateManager = (function() {
 
 
         } else if (profilePatternFollowings.test(location.hash)) {
-            /* Подписки */
+
             controller = null;
             controller = new ProfileController();
 
-            userLogin = RegExp.$1;
-
-            Users.getFollowings(userLogin, function(data) {
+            userId = RegExp.$1;
+            currentPageTitle.innerHTML = 'Подписки';
+            Users.getFollowings(userId, function(data) {
                 controller.loadTemplate('/templates/profile_followings.html', function(template) {
                     viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userLogin: userLogin
+                        userId: userId
                     });
                     makeUserList(data);
                 });
@@ -136,16 +249,17 @@ var StateManager = (function() {
 
 
         } else if (profilePatternRepositories.test(location.hash)) {
-            /* Репозитории */
+
             controller = null;
             controller = new ProfileController();
 
-            userLogin = RegExp.$1;
+            userId = RegExp.$1;
+            currentPageTitle.innerHTML = 'Репозитории';
 
-            Users.getRepositories(userLogin, function(data) {
+            Users.getRepositories(userId, function(data) {
                 controller.loadTemplate('/templates/profile_repositories.html', function(template) {
                     viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userLogin: userLogin
+                        userId: userId
                     });
                     var repositoriesContainer = document.getElementById('repositoriesContainer');
                     if (data.length > 0) {
@@ -177,7 +291,7 @@ var StateManager = (function() {
 
 
 
-        }
+        }*/
     };
 
 

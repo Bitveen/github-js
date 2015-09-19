@@ -7,12 +7,11 @@
 .profile-tabs {
   margin-top: 50px;
   font-size: 0;
-  text-align: center;
   &__container {
     margin: 0;
-    padding: 0;
+    padding: 0 0 0 15px;
     list-style: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid $border-color;
   }
 
   &__item {
@@ -28,28 +27,29 @@
     padding: 10px 15px;
     font-size: 14px;
     text-decoration: none;
-    color: #6383A8;
+    color: $link-color;
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
     &:hover {
-      background-color: #f6f6f6;
+      background-color: $bg-hover-color;
     }
     &_active {
-      background-color: #f6f6f6;
+      background-color: $bg-hover-color;
     }
 
   }
 
 }
 .profile-content {
+  @include clearfix();
   margin-top: 30px;
+  margin-bottom: 30px;
   &__avatar-container {
     box-sizing: border-box;
     float: left;
     width: 50%;
     position: relative;
     padding-left: 15px;
-    text-align: center;
   }
   &__avatar {
     max-width: 100%;
@@ -67,11 +67,7 @@
     padding-left: 15px;
     padding-right: 15px;
     margin-bottom: 15px;
-    &:after {
-      content: '';
-      display: block;
-      clear: both;
-    }
+    @include clearfix();
   }
 
   &__main-info-label {
@@ -89,6 +85,11 @@
   }
   &__users-empty {
     text-align: center;
+    margin: 50px auto 0 auto;
+    background-color: $bg-hover-color;
+    padding: 10px 0;
+    width: 400px;
+    border-radius: 3px;
   }
 
 }
@@ -99,39 +100,43 @@
   list-style: none;
   width: 400px;
   margin: 0 auto;
-  border: 1px solid #ddd;
+  border: 1px solid $border-color;
   border-radius: 3px;
   &__item {
   }
   &__link {
-    color: #6383A8;
+    color: $link-color;
     display: block;
     padding: 10px 15px;
     text-decoration: none;
     &:hover {
-      background-color: #f1f1f1;
+      background-color: $bg-hover-color;
     }
   }
 }
 .repository-list {
   list-style: none;
   padding: 0;
-  margin: 0;
-  text-align: center;
+  margin: 0 auto;
+
+
+
   &__item {
-    border-bottom: 1px solid #ddd;
-    padding: 10px;
+    padding: 15px;
+    &:hover {
+      background-color: $bg-hover-color;
+    }
   }
   &__title {
     display: block;
   }
   &__link {
-    color: #6383A8;
+    color: $link-color;
     &:visited {
-      color: #6383A8;
+      color: $link-color;
     }
     &:link {
-      color: #6383A8;
+      color: $link-color;
     }
   }
 }

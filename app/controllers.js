@@ -33,7 +33,10 @@ BaseController.prototype.parseTemplate = function(template, data) {
 
 
 
-function SearchController() {
+function SearchController(state) {
+    this.templatePath = '/templates/search.html';
+
+
 
     /*        var searchArea = document.getElementById('searchArea');
      var searchInput = document.getElementById('searchInput');
@@ -81,6 +84,62 @@ function SearchController() {
 SearchController.prototype = Object.create(BaseController.prototype);
 
 
+/* Контроллер для вкладки с основной информацией */
+function ProfileMainController(state) {
+    this.templatePath = '/templates/profile_main.html';
+    this.data = null;
+    this.getData = function(callback) {
+        Users.getInfo(RegExp.$1, callback);
+    };
+}
+ProfileMainController.prototype = Object.create(BaseController.prototype);
 
-function ProfileController() {}
-ProfileController.prototype = Object.create(BaseController.prototype);
+
+/* Контроллер для вкладки с подписчиками */
+function ProfileFollowersController(state) {
+    this.templatePath = '/templates/profile_followers.html';
+    this.data = null;
+    this.noDataText = 'Пользователи отсутствуют.';
+
+    this.getData = function(callback) {
+        Users.getFollowers(RegExp.$1, callback);
+    };
+
+}
+ProfileFollowersController.prototype = Object.create(BaseController.prototype);
+
+
+
+/* Контроллер для вкладки с подписками */
+function ProfileFollowingsController(state) {
+    this.templatePath = '/templates/profile_followings.html';
+    this.data = null;
+    this.noDataText = 'Пользователи отсутствуют.';
+
+    this.getData = function(callback) {
+        Users.getFollowings(RegExp.$1, callback);
+    };
+}
+ProfileFollowingsController.prototype = Object.create(BaseController.prototype);
+
+
+
+/* Контроллер для вкладки с репозиториями */
+function ProfileRepositoriesController(state) {
+    this.templatePath = '/templates/profile_repositories.html';
+    this.data = null;
+    this.noDataText = 'Репозитории отсутствуют.';
+
+    this.getData = function(callback) {
+        Users.getRepositories(RegExp.$1, callback);
+    };
+}
+ProfileRepositoriesController.prototype = Object.create(BaseController.prototype);
+
+
+
+
+function NotFoundController() {
+    this.templatePath = '/templates/not_found.html';
+}
+NotFoundController.prototype = Object.create(BaseController.prototype);

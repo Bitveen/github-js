@@ -2,13 +2,14 @@
   position: relative;
   text-align: center;
   width: 500px;
+  min-height: 400px;
   margin: 50px auto 0 auto;
   &__input {
     width: 400px;
     padding: 10px;
     outline: none;
     font-size: 14px;
-    border: 1px solid #ddd;
+    border: 1px solid $border-color;
     border-radius: 3px;
   }
 }
@@ -19,7 +20,7 @@
   top: 45px;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #ddd;
+  border: 1px solid $border-color;
   border-radius: 3px;
   max-height: 400px;
   overflow: auto;
@@ -32,11 +33,11 @@
 
   &__item {
     padding: 10px 15px;
-    color: #6383A8;
+    color: $link-color;
 
     text-align: left;
     &:hover {
-      background-color: #f6f6f6;
+      background-color: $bg-hover-color;
       cursor: pointer;
     }
   }

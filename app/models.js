@@ -17,11 +17,10 @@ var Users = (function() {
             }, false);
 
         },
-        getInfo: function(login, callback) {
+        getInfo: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/users/' + login, true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId, true);
             xhr.send(null);
-
             xhr.addEventListener('load', function(event) {
                 var response = event.target;
                 if (response.status == 200) {
@@ -31,22 +30,9 @@ var Users = (function() {
             }, false);
 
         },
-        getRepositories: function(login, callback) {
+        getRepositories: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/users/' + login + '/repos', true);
-            xhr.send(null);
-
-            xhr.addEventListener('load', function(event) {
-                var response = event.target;
-                if (response.status == 200) {
-                    callback(JSON.parse(response.responseText));
-                }
-            }, false);
-
-        },
-        getFollowers: function(login, callback) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/users/' + login + '/followers', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/repos', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -57,9 +43,24 @@ var Users = (function() {
             }, false);
 
         },
-        getFollowings: function(login, callback) {
+        getFollowers: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/users/' + login + '/following', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/followers', true);
+            xhr.send(null);
+
+            xhr.addEventListener('load', function(event) {
+                var response = event.target;
+                //<https://api.github.com/user/111631/followers?page=2>; rel="next"
+                var linkHeader = response.getResponseHeader('Link');
+                if (response.status == 200) {
+                    callback(JSON.parse(response.responseText));
+                }
+            }, false);
+
+        },
+        getFollowings: function(userId, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/following', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
