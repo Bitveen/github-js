@@ -1,11 +1,12 @@
 var Users = (function() {
     /* Закрытые методы и свойства */
+    var currentUser = null;
 
     return {
         find: function(query, callback) {
             var xhr = new XMLHttpRequest();
 
-            xhr.open('GET', 'https://api.github.com/search/users?q=' + query, true);
+            xhr.open('GET', 'https://api.github.com/search/users?q=' + query + '&access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -19,12 +20,13 @@ var Users = (function() {
         },
         getInfo: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId, true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
             xhr.addEventListener('load', function(event) {
                 var response = event.target;
                 if (response.status == 200) {
-                    callback(JSON.parse(response.responseText));
+                    currentUser = JSON.parse(response.responseText);
+                    callback(currentUser);
                 }
 
             }, false);
@@ -32,7 +34,7 @@ var Users = (function() {
         },
         getRepositories: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId + '/repos', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/repos?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -45,7 +47,7 @@ var Users = (function() {
         },
         getFollowers: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId + '/followers', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/followers?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -60,7 +62,7 @@ var Users = (function() {
         },
         getFollowings: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId + '/following', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/following?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -70,6 +72,9 @@ var Users = (function() {
                 }
             }, false);
 
+        },
+        getCurrentUser: function() {
+            return currentUser;
         }
     };
 })();

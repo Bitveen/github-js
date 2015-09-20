@@ -59,7 +59,7 @@ html, body {
   position: relative;
   text-align: center;
   width: 500px;
-  min-height: 400px;
+  min-height: 500px;
   margin: 50px auto 0 auto;
 }
 
@@ -75,13 +75,16 @@ html, body {
 .search-results {
   position: absolute;
   padding: 10px 0;
+  z-index: 100;
   top: 45px;
+  display: none;
   width: 100%;
   box-sizing: border-box;
   border: 1px solid #ddd;
   border-radius: 3px;
   max-height: 400px;
   overflow: auto;
+  background-color: #fff;
 }
 
 .search-results__result {
@@ -90,20 +93,32 @@ html, body {
   margin: 0;
 }
 
-.search-results__item {
-  padding: 10px 15px;
-  color: #6383A8;
-  text-align: left;
+.search-results__no-match {
+  text-align: center;
+  margin: 0;
 }
 
-.search-results__item:hover {
+.search-results__link {
+  text-decoration: none;
+  text-align: left;
+  color: #6383A8;
+  display: block;
+  padding: 10px 15px;
+}
+
+.search-results__link:hover {
   background-color: #f6f6f6;
   cursor: pointer;
 }
 
-.search-results__no-match {
+.search-placeholder {
+  color: #777777;
   text-align: center;
-  margin: 0;
+  margin-top: 180px;
+}
+
+#resultNotFound {
+  display: none;
 }
 
 .profile-header {
@@ -243,6 +258,7 @@ html, body {
 }
 
 .repository-list__item {
+  font-size: 14px;
   padding: 15px;
 }
 

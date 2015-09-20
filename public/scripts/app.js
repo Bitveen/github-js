@@ -7,6 +7,7 @@ var Application = (function() {
             }
             StateManager.restore();
             StateManager.setHandler();
+
         }
     };
 })();
@@ -15,6 +16,8 @@ var Application = (function() {
 
 var StateManager = (function() {
 
+    var viewContainer = document.getElementById('viewContainer');
+    var currentPageTitle = document.getElementById('currentPageTitle');
 
     var currentState = null;
 
@@ -51,8 +54,6 @@ var StateManager = (function() {
         }
     ];
 
-
-
     // определение текущего стейта из доступных по хэшу
     var setCurrentState = function() {
         for (var i = 0; i < states.length; i++) {
@@ -66,43 +67,44 @@ var StateManager = (function() {
 
 
     var makeUserList = function(userList) {
-        var usersArea = document.getElementById('usersArea');
-        if (userList.length > 0) {
-            var ul = document.createElement('ul');
-            ul.className = 'users-list';
-            var fragment = document.createDocumentFragment();
-            var li = null;
-            var a = null;
+        var contentArea = document.getElementById('contentArea');
+        var ul = document.createElement('ul');
+        ul.className = 'users-list';
+        var fragment = document.createDocumentFragment();
+        var li = null;
+        var a = null;
 
-            userList.forEach(function(user) {
-                a = document.createElement('a');
-                a.href = '#/profile/' + user.id + '/main';
-                a.className = 'users-list__link';
-                a.appendChild(document.createTextNode(user.login));
-                li = document.createElement('li');
-                li.className = 'users-list__item';
-                li.appendChild(a);
-                fragment.appendChild(li);
-            });
-            ul.appendChild(fragment);
-            usersArea.appendChild(ul);
-
-        } else {
-            var p = document.createElement('p');
-            p.className = 'profile-content__users-empty';
-            p.appendChild(document.createTextNode('Пользователи отсутствуют.'));
-            usersArea.appendChild(p);
-        }
-
-
+        userList.forEach(function(user) {
+            a = document.createElement('a');
+            a.href = '#/profile/' + user.id + '/main';
+            a.className = 'users-list__link';
+            a.appendChild(document.createTextNode(user.login));
+            li = document.createElement('li');
+            li.className = 'users-list__item';
+            li.appendChild(a);
+            fragment.appendChild(li);
+        });
+        ul.appendChild(fragment);
+        contentArea.appendChild(ul);
     };
-    var viewContainer = document.getElementById('viewContainer');
-    var currentPageTitle = document.getElementById('currentPageTitle');
 
-    /*var profilePatternMain =
-    var profilePatternFollowers = /#\/profile\/([0-9]+)\/followers/;
-    var profilePatternFollowings = /#\/profile\/([0-9]+)\/followings/;
-    var profilePatternRepositories = /#\/profile\/([0-9]+)\/repositories/;*/
+    var makeRepositoryList = function(repositoryList) {
+        var repositoriesContainer = document.getElementById('contentArea');
+        var ul = document.createElement('ul');
+        ul.className = 'repository-list';
+        var repositoryTemplate = '<li class="repository-list__item">' +
+            '<span class="repository-list__title">{{name}}</span>' +
+            '<a class="repository-list__link" href="{{url}}" target="_blank">{{url}}</a></li>';
+        var generatedList = "";
+        var parsedTemplate = "";
+        repositoryList.forEach(function(repository) {
+            parsedTemplate = repositoryTemplate.replace(/\{\{name}}/g, repository.name);
+            parsedTemplate = parsedTemplate.replace(/\{\{url}}/g, repository.html_url);
+            generatedList += parsedTemplate;
+        });
+        ul.innerHTML = generatedList;
+        repositoriesContainer.appendChild(ul);
+    };
 
 
     var stateHandler = function() {
@@ -113,21 +115,16 @@ var StateManager = (function() {
         } else {
             controller = new NotFoundController();
         }
-
         if (controller.hasOwnProperty('getData')) {
 
             controller.getData(function(receivedData) {
                 controller.data = receivedData;
+                currentPageTitle.innerHTML = Users.getCurrentUser().login + '::' + currentState.Title;
                 controller.loadTemplate(controller.templatePath, function(template) {
-                    viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userId: RegExp.$1
-                    });
-
                     if (controller.data instanceof Array) {
-                        // это значит, что нужно проверить размер,
-                        // если он равен нулю, то выводить что пусто
-
-
+                        viewContainer.innerHTML = controller.parseTemplate(template, {
+                            userId: RegExp.$1
+                        });
                         if (controller.data.length == 0) {
                             //ничего не найдено
                             var contentArea = document.getElementById('contentArea');
@@ -138,167 +135,53 @@ var StateManager = (function() {
 
                         } else {
                             //делаем список
-                            console.log('Has Data');
+
+                            switch (currentState.Name) {
+                                case 'profile.followers':
+                                case 'profile.followings':
+                                    makeUserList(controller.data);
+                                    break;
+                                case 'profile.repositories':
+                                    makeRepositoryList(controller.data);
+                                    break;
+                            }
+
                         }
 
 
 
+
+
+                    } else {
+                        //вкладка основной информации или просто вкладка, где не нужно формировать списки элементов
+                        viewContainer.innerHTML = controller.parseTemplate(template, {
+                            userId: RegExp.$1,
+                            avatar: controller.data.avatar_url,
+                            name: controller.data.name || 'Не указано',
+                            company: controller.data.company || 'Не указано',
+                            repositoryCount: controller.data.public_repos,
+                            gistCount: controller.data.public_gists,
+                            followingsCount: controller.data.following
+                        });
                     }
-
-
-
-
-
-
-
 
                 });
             });
+
+
+
         } else {
+            currentPageTitle.innerHTML = currentState.Title;
             controller.loadTemplate(controller.templatePath, function(template) {
                 viewContainer.innerHTML = template;
             });
         }
 
+        if (controller.hasOwnProperty('initListeners')) {
+            controller.initListeners();
+        }
 
-
-
-
-
-
-
-
-
-
-/*        if (location.hash == '#/') {
-            controller = null;
-            controller = new SearchController();
-            currentPageTitle.innerHTML = 'Поиск пользователей';
-            controller.loadTemplate('/templates/search.html', function(template) {
-                viewContainer.innerHTML = template;
-            });
-
-
-        } else if (profilePatternMain.test(location.hash)) {
-            controller = null;
-            controller = new ProfileController();
-
-            userId = RegExp.$1;
-            currentPageTitle.innerHTML = 'Основная информация';
-            Users.getInfo(userId, function(data) {
-                controller.loadTemplate('/templates/profile_main.html', function(template) {
-                    viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userId: userId,
-                        avatar: data.avatar_url,
-                        name: data.name || 'Не указано',
-                        company: data.company || 'Не указано',
-                        repositoryCount: data.public_repos,
-                        gistCount: data.public_gists,
-                        followingsCount: data.following
-                    });
-                });
-            });
-
-
-
-
-
-
-        } else if (profilePatternFollowers.test(location.hash)) {
-
-            controller = null;
-            controller = new ProfileController();
-
-            userId = RegExp.$1;
-            currentPageTitle.innerHTML = 'Подписчики';
-            Users.getFollowers(userId, function(data) {
-                controller.loadTemplate('/templates/profile_followers.html', function(template) {
-                    viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userId: userId
-                    });
-                    makeUserList(data);
-
-
-
-                });
-
-
-            });
-
-
-
-
-
-
-        } else if (profilePatternFollowings.test(location.hash)) {
-
-            controller = null;
-            controller = new ProfileController();
-
-            userId = RegExp.$1;
-            currentPageTitle.innerHTML = 'Подписки';
-            Users.getFollowings(userId, function(data) {
-                controller.loadTemplate('/templates/profile_followings.html', function(template) {
-                    viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userId: userId
-                    });
-                    makeUserList(data);
-                });
-            });
-
-
-
-        } else if (profilePatternRepositories.test(location.hash)) {
-
-            controller = null;
-            controller = new ProfileController();
-
-            userId = RegExp.$1;
-            currentPageTitle.innerHTML = 'Репозитории';
-
-            Users.getRepositories(userId, function(data) {
-                controller.loadTemplate('/templates/profile_repositories.html', function(template) {
-                    viewContainer.innerHTML = controller.parseTemplate(template, {
-                        userId: userId
-                    });
-                    var repositoriesContainer = document.getElementById('repositoriesContainer');
-                    if (data.length > 0) {
-                        var ul = document.createElement('ul');
-                        ul.className = 'repository-list';
-
-                        var repositoryTemplate = '<li class="repository-list__item">' +
-                            '<span class="repository-list__title">{{name}}</span>' +
-                            '<a class="repository-list__link" href="{{url}}" target="_blank">{{url}}</a></li>';
-
-                        var generatedList = "";
-                        var parsedTemplate = "";
-                        data.forEach(function(item) {
-                            parsedTemplate = repositoryTemplate.replace(/\{\{name}}/g, item.name);
-                            parsedTemplate = parsedTemplate.replace(/\{\{url}}/g, item.html_url);
-                            generatedList += parsedTemplate;
-                        });
-                        ul.innerHTML = generatedList;
-                        repositoriesContainer.appendChild(ul);
-
-                    } else {
-                        var p = document.createElement('p');
-                        p.className = 'profile-content__repositories-empty';
-                        repositoriesContainer.appendChild(p.appendChild(document.createTextNode('Репозитории отсутствуют.')));
-                    }
-
-                });
-            });
-
-
-
-        }*/
     };
-
-
-
-
-
-
     return {
         restore: function() {
             if (location.hash !== '') {
@@ -320,7 +203,6 @@ window.addEventListener('load', function(event) {
 
 
 function BaseController() {}
-
 BaseController.prototype.loadTemplate = function(pathToTemplate, callback) {
     var template = sessionStorage.getItem(pathToTemplate);
     if (!template) {
@@ -340,6 +222,7 @@ BaseController.prototype.loadTemplate = function(pathToTemplate, callback) {
     }
 
 };
+
 BaseController.prototype.parseTemplate = function(template, data) {
     var regexp;
     for (var prop in data) {
@@ -353,71 +236,98 @@ BaseController.prototype.parseTemplate = function(template, data) {
 
 
 
-
+/* Контроллер для поиска пользователей */
 function SearchController(state) {
+    document.title = 'Поиск пользователей';
+
     this.templatePath = '/templates/search.html';
 
+    this.initListeners = function() {
+
+        var searchArea = document.getElementById('searchArea');
+        var searchInput = document.getElementById('searchInput');
+        var searchPlaceholder = document.getElementById('searchPlaceholder');
+        var notFoundBlock = document.getElementById('resultNotFound');
 
 
-    /*        var searchArea = document.getElementById('searchArea');
-     var searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keyup', function(event) {
+            var _self = this;
+            if (_self.value.length >= 3) {
+                setTimeout(function() {
+                    Users.find(_self.value, function(data) {
+
+                        if (data.length == 0) {
+                            searchPlaceholder.style.display = "none";
+                            notFoundBlock.style.display = "block";
+                            searchArea.style.display = "none";
+                        } else {
+                            searchPlaceholder.style.display = "none";
+                            searchArea.style.display = "block";
+
+                            var userList = document.createDocumentFragment();
+                            var ul = document.createElement('ul');
+                            var li = null;
+                            var a = null;
+                            ul.className = "search-results__result";
+                            data.items.forEach(function(item) {
+                                li = document.createElement('li');
+                                a = document.createElement('a');
+                                a.href = "#/profile/" + item.id + "/main";
+                                a.className = 'search-results__link';
+                                a.appendChild(document.createTextNode(item.login));
+                                li.className = "search-results__item";
+                                li.appendChild(a);
+                                userList.appendChild(li);
+                            });
+                            ul.appendChild(userList);
+                            searchArea.replaceChild(ul, searchArea.firstElementChild);
+                        }
 
 
-     searchInput.addEventListener('keyup', function(event) {
-     var _self = this;
-     if (_self.value.length >= 3) {
-     setTimeout(function() {
 
-     Users.find(_self.value, function(data) {
-     var userList = document.createDocumentFragment();
-     var ul = document.createElement('ul');
-     var li = null;
-     ul.className = "search-results__result";
-
-     data.items.forEach(function(item) {
-     li = document.createElement('li');
-     li.className = "search-results__item";
-     li.dataset.login = item.login;
-     li.appendChild(document.createTextNode(item.login));
-     userList.appendChild(li);
-     });
-     ul.appendChild(userList);
-     searchArea.replaceChild(ul, searchArea.firstElementChild);
-
-     });
-
-     }, 500);
-
-     }
-
-     }, false);
+                    });
+                }, 500);
+            }
+        }, false);
 
 
-     searchArea.addEventListener('click', function(event) {
-     if (event.target.tagName.toLowerCase() === 'li') {
-     Users.getInfo(event.target.dataset.login, function(data) {
-     console.log(data);
-     });
-     }
-     }, false);*/
+        searchArea.addEventListener('click', function(event) {
+            if (event.target.tagName.toLowerCase() === 'li') {
+                Users.getInfo(event.target.dataset.login, function(data) {
+                    console.log(data);
+                });
+            }
+        }, false);
+
+    };
+
+
 
 }
+
 SearchController.prototype = Object.create(BaseController.prototype);
+
 
 
 /* Контроллер для вкладки с основной информацией */
 function ProfileMainController(state) {
+    document.title = 'Основная информация';
+
     this.templatePath = '/templates/profile_main.html';
     this.data = null;
     this.getData = function(callback) {
         Users.getInfo(RegExp.$1, callback);
     };
+
+
 }
 ProfileMainController.prototype = Object.create(BaseController.prototype);
 
 
 /* Контроллер для вкладки с подписчиками */
 function ProfileFollowersController(state) {
+    document.title = 'Подписчики';
+
     this.templatePath = '/templates/profile_followers.html';
     this.data = null;
     this.noDataText = 'Пользователи отсутствуют.';
@@ -426,6 +336,7 @@ function ProfileFollowersController(state) {
         Users.getFollowers(RegExp.$1, callback);
     };
 
+
 }
 ProfileFollowersController.prototype = Object.create(BaseController.prototype);
 
@@ -433,6 +344,8 @@ ProfileFollowersController.prototype = Object.create(BaseController.prototype);
 
 /* Контроллер для вкладки с подписками */
 function ProfileFollowingsController(state) {
+    document.title = 'Подписки';
+
     this.templatePath = '/templates/profile_followings.html';
     this.data = null;
     this.noDataText = 'Пользователи отсутствуют.';
@@ -440,6 +353,8 @@ function ProfileFollowingsController(state) {
     this.getData = function(callback) {
         Users.getFollowings(RegExp.$1, callback);
     };
+
+
 }
 ProfileFollowingsController.prototype = Object.create(BaseController.prototype);
 
@@ -447,6 +362,8 @@ ProfileFollowingsController.prototype = Object.create(BaseController.prototype);
 
 /* Контроллер для вкладки с репозиториями */
 function ProfileRepositoriesController(state) {
+    document.title = 'Репозитории';
+
     this.templatePath = '/templates/profile_repositories.html';
     this.data = null;
     this.noDataText = 'Репозитории отсутствуют.';
@@ -454,6 +371,7 @@ function ProfileRepositoriesController(state) {
     this.getData = function(callback) {
         Users.getRepositories(RegExp.$1, callback);
     };
+
 }
 ProfileRepositoriesController.prototype = Object.create(BaseController.prototype);
 
@@ -466,12 +384,13 @@ function NotFoundController() {
 NotFoundController.prototype = Object.create(BaseController.prototype);
 var Users = (function() {
     /* Закрытые методы и свойства */
+    var currentUser = null;
 
     return {
         find: function(query, callback) {
             var xhr = new XMLHttpRequest();
 
-            xhr.open('GET', 'https://api.github.com/search/users?q=' + query, true);
+            xhr.open('GET', 'https://api.github.com/search/users?q=' + query + '&access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -485,12 +404,13 @@ var Users = (function() {
         },
         getInfo: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId, true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
             xhr.addEventListener('load', function(event) {
                 var response = event.target;
                 if (response.status == 200) {
-                    callback(JSON.parse(response.responseText));
+                    currentUser = JSON.parse(response.responseText);
+                    callback(currentUser);
                 }
 
             }, false);
@@ -498,7 +418,7 @@ var Users = (function() {
         },
         getRepositories: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId + '/repos', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/repos?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -511,7 +431,7 @@ var Users = (function() {
         },
         getFollowers: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId + '/followers', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/followers?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -526,7 +446,7 @@ var Users = (function() {
         },
         getFollowings: function(userId, callback) {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://api.github.com/user/' + userId + '/following', true);
+            xhr.open('GET', 'https://api.github.com/user/' + userId + '/following?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
@@ -536,6 +456,9 @@ var Users = (function() {
                 }
             }, false);
 
+        },
+        getCurrentUser: function() {
+            return currentUser;
         }
     };
 })();
