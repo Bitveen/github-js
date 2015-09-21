@@ -7,7 +7,9 @@
 .profile-tabs {
   margin-top: 50px;
   font-size: 0;
+  position: relative;
   &__container {
+    position: relative;
     margin: 0;
     padding: 0 0 0 15px;
     list-style: none;
@@ -83,13 +85,11 @@
     padding-left: 15px;
     box-sizing: border-box;
   }
-  &__users-empty {
+  &__result-empty {
     text-align: center;
     margin: 50px auto 0 auto;
-    background-color: $bg-hover-color;
     padding: 10px 0;
     width: 400px;
-    border-radius: 3px;
   }
 
 }

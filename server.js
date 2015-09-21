@@ -1,6 +1,7 @@
 var http = require('http'),
     fs   = require('fs'),
     path = require('path'),
+    url = require('url'),
     EventEmitter = require('events').EventEmitter;
 
 var fileEmitter = new EventEmitter();
@@ -27,15 +28,15 @@ function handleLayout(res) {
 }
 
 /* Функция для обслуживания статических файлов: partials, css, js */
-function serveStatic(req, res) {
+function serveStatic(requestPath, req, res) {
     /* Чтобы Chrome не пытался грузить favicon */
-    if (req.url === '/favicon.ico') {
+    if (requestPath === '/favicon.ico') {
         res.statusCode = 404;
         res.end();
         return;
     }
 
-    var path = pathToPublic + req.url;
+    var path = pathToPublic + requestPath;
 
     fs.readFile(path, function(err, fileData) {
         if (err) {
@@ -43,7 +44,7 @@ function serveStatic(req, res) {
         }
         res.setHeader('Content-Length', Buffer.byteLength(fileData));
         res.statusCode = 200;
-        writeStaticHeader(req, res);
+        writeStaticHeader(requestPath, res);
         res.write(fileData);
         res.end();
     });
@@ -51,9 +52,9 @@ function serveStatic(req, res) {
 }
 
 /* Функция для записи заголовка Content-Type на базе расширения файла */
-function writeStaticHeader(req, res) {
+function writeStaticHeader(requestPath, res) {
 
-    var extension = req.url.slice(req.url.lastIndexOf('.') + 1);
+    var extension = requestPath.slice(requestPath.lastIndexOf('.') + 1);
     switch (extension) {
         case 'html':
             res.setHeader('Content-Type', 'text/html');
@@ -65,7 +66,7 @@ function writeStaticHeader(req, res) {
             res.setHeader('Content-Type', 'text/javascript');
             break;
         default:
-            res.statusCode = 500;
+            res.setHeader('Content-Type', 'text/plain');
     }
 
 }
@@ -84,7 +85,9 @@ fileEmitter.on('fileError', function(reason) {
 /* Сам сервер для обслуживания запросов */
 var server = http.createServer(function(req, res) {
 
-    if (req.method === 'GET' && req.url === '/') {
+    var requestPath = url.parse(req.url).pathname;
+
+    if (req.method === 'GET' && requestPath === '/') {
 
         fs.exists(pathToPublic + '/templates/layout.html', function(exists) {
             if (!exists) {
@@ -95,11 +98,11 @@ var server = http.createServer(function(req, res) {
         });
 
     } else {
-        fs.exists(pathToPublic + req.url, function(exists) {
+        fs.exists(pathToPublic + requestPath, function(exists) {
             if (!exists) {
                 fileEmitter.emit('fileError', 'Файл отсутствует.');
             }
-            fileEmitter.emit('staticFileExists', req, res);
+            fileEmitter.emit('staticFileExists', requestPath, req, res);
 
         });
 
