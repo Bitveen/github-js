@@ -28,7 +28,7 @@ function handleLayout(res) {
 }
 
 /* Функция для обслуживания статических файлов: partials, css, js */
-function serveStatic(requestPath, req, res) {
+function serveStatic(requestPath, res) {
     /* Чтобы Chrome не пытался грузить favicon */
     if (requestPath === '/favicon.ico') {
         res.statusCode = 404;
@@ -102,7 +102,7 @@ var server = http.createServer(function(req, res) {
             if (!exists) {
                 fileEmitter.emit('fileError', 'Файл отсутствует.');
             }
-            fileEmitter.emit('staticFileExists', requestPath, req, res);
+            fileEmitter.emit('staticFileExists', requestPath, res);
 
         });
 

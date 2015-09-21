@@ -18,6 +18,8 @@ var Users = (function() {
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
 
             }, false);
@@ -42,10 +44,11 @@ var Users = (function() {
             xhr.open('GET', 'https://api.github.com/user/' + userId + '?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
+                } else if (response.status == 404) {
+                    //ничего не найдено
                 }
 
             }, false);
@@ -70,11 +73,13 @@ var Users = (function() {
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
+
             }, false);
 
             xhr.addEventListener('error', function(event) {
@@ -96,12 +101,14 @@ var Users = (function() {
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
 
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
+
             }, false);
 
             xhr.addEventListener('error', function(event) {
@@ -123,12 +130,15 @@ var Users = (function() {
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
+
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
 
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
+
             }, false);
 
 

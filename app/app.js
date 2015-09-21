@@ -10,7 +10,6 @@ var Application = (function() {
         }
     };
 })();
-
 var StateManager = (function() {
     var currentState = null;
     var states = [
@@ -45,7 +44,6 @@ var StateManager = (function() {
             Controller: ProfileRepositoriesController
         }
     ];
-
     // определение текущего стейта из доступных по хэшу
     var setCurrentState = function() {
         for (var i = 0; i < states.length; i++) {
@@ -56,7 +54,6 @@ var StateManager = (function() {
             currentState = null;
         }
     };
-
     var stateHandler = function() {
         setCurrentState();
         if (currentState) {
@@ -65,8 +62,6 @@ var StateManager = (function() {
             new NotFoundController();
         }
     };
-
-
     return {
         restore: function() {
             if (location.hash !== '') {
@@ -80,6 +75,9 @@ var StateManager = (function() {
             return currentState;
         }
     };
+
+
+
 })();
 
 window.addEventListener('load', function(event) {

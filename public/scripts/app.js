@@ -10,7 +10,6 @@ var Application = (function() {
         }
     };
 })();
-
 var StateManager = (function() {
     var currentState = null;
     var states = [
@@ -45,7 +44,6 @@ var StateManager = (function() {
             Controller: ProfileRepositoriesController
         }
     ];
-
     // определение текущего стейта из доступных по хэшу
     var setCurrentState = function() {
         for (var i = 0; i < states.length; i++) {
@@ -56,7 +54,6 @@ var StateManager = (function() {
             currentState = null;
         }
     };
-
     var stateHandler = function() {
         setCurrentState();
         if (currentState) {
@@ -65,8 +62,6 @@ var StateManager = (function() {
             new NotFoundController();
         }
     };
-
-
     return {
         restore: function() {
             if (location.hash !== '') {
@@ -80,6 +75,9 @@ var StateManager = (function() {
             return currentState;
         }
     };
+
+
+
 })();
 
 window.addEventListener('load', function(event) {
@@ -89,6 +87,7 @@ window.addEventListener('load', function(event) {
 function BaseController() {
     this.currentPageTitle = document.getElementById('currentPageTitle');
     this.viewContainer = document.getElementById('viewContainer');
+    this.spinner = document.getElementById('spinner');
 }
 BaseController.prototype.loadTemplate = function(pathToTemplate, callback) {
     var template = sessionStorage.getItem(pathToTemplate);
@@ -172,32 +171,28 @@ BaseController.prototype.makeNoDataArea = function() {
 function SearchController() {
     BaseController.call(this);
     var _self = this;
-    document.title = 'Поиск пользователей';
+
     this.templatePath = '/templates/search.html';
-    this.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
-    _self.loadTemplate(_self.templatePath, function(template) {
-        _self.viewContainer.innerHTML = template;
-        var searchArea        = document.getElementById('searchArea');
-        var searchInput       = document.getElementById('searchInput');
-        var searchPlaceholder = document.getElementById('searchPlaceholder');
-        var notFoundBlock     = document.getElementById('resultNotFound');
 
-        searchInput.addEventListener('keyup', function(event) {
-            var self = this;
-            if (self.value.length == 0) {
-                searchPlaceholder.style.display = "block";
-                searchArea.style.display = "none";
+    var searchHandler = (function(event) {
+        var self = this;
+        self.searchInput.removeEventListener('keyup', searchHandler, false);
+
+        setTimeout(function() {
+            var element = event.target;
+            if (element.value.length == 0) {
+                self.searchPlaceholder.style.display = "block";
+                self.searchArea.style.display = "none";
             } else {
-
-                Users.find(self.value, function(usersData) {
+                Users.find(element.value, function(usersData) {
                     if (usersData.items.length == 0) {
-                        searchPlaceholder.style.display = "none";
-                        notFoundBlock.style.display = "block";
-                        searchArea.style.display = "none";
+                        self.searchPlaceholder.style.display = "none";
+                        self.notFoundBlock.style.display     = "block";
+                        self.searchArea.style.display        = "none";
                     } else {
-                        searchPlaceholder.style.display = "none";
-                        searchArea.style.display = "block";
-                        notFoundBlock.style.display = "none";
+                        self.searchPlaceholder.style.display = "none";
+                        self.searchArea.style.display        = "block";
+                        self.notFoundBlock.style.display     = "none";
                         var userList = document.createDocumentFragment();
                         var ul = document.createElement('ul');
                         var li = null;
@@ -214,12 +209,29 @@ function SearchController() {
                             userList.appendChild(li);
                         });
                         ul.appendChild(userList);
-                        searchArea.replaceChild(ul, searchArea.firstElementChild);
+                        self.searchArea.replaceChild(ul, self.searchArea.firstElementChild);
                     }
                 });
             }
-        }, false);
+            self.searchInput.addEventListener('keyup', searchHandler, false);
+        }, 400);
 
+
+
+    }).bind(this);
+
+
+    _self.loadTemplate(_self.templatePath, function(template) {
+        document.title = 'Поиск пользователей';
+        _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
+        _self.viewContainer.innerHTML = template;
+
+        _self.searchArea        = document.getElementById('searchArea');
+        _self.searchInput       = document.getElementById('searchInput');
+        _self.searchPlaceholder = document.getElementById('searchPlaceholder');
+        _self.notFoundBlock     = document.getElementById('resultNotFound');
+        _self.searchInput.addEventListener('keyup', searchHandler, false);
     });
 
 
@@ -232,13 +244,15 @@ function ProfileMainController() {
     BaseController.call(this);
     var _self = this;
 
-    document.title = 'Основная информация';
     this.templatePath = '/templates/profile_main.html';
-
     Users.getInfo(RegExp.$1, function(receivedData) {
         _self.data = receivedData;
-        _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
         _self.loadTemplate(_self.templatePath, function(template) {
+            _self.spinner.style.display = 'none';
+            document.title = 'Основная информация';
+            _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
             _self.viewContainer.innerHTML = _self.parseTemplate(template, {
                 userId: RegExp.$1,
                 avatar: receivedData.avatar_url,
@@ -258,14 +272,16 @@ ProfileMainController.prototype = Object.create(BaseController.prototype);
 function ProfileFollowersController() {
     BaseController.call(this);
     var _self = this;
-    document.title = 'Подписчики';
 
     this.templatePath = '/templates/profile_followers.html';
     this.noDataText = 'Пользователи отсутствуют.';
 
     Users.getFollowers(RegExp.$1, function(followersList) {
-        _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
         _self.loadTemplate(_self.templatePath, function(template) {
+            _self.spinner.style.display = 'none';
+            document.title = 'Подписчики';
+            _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
             _self.viewContainer.innerHTML = _self.parseTemplate(template, {
                 userId: RegExp.$1
             });
@@ -286,7 +302,7 @@ ProfileFollowersController.prototype = Object.create(BaseController.prototype);
 /* Контроллер для вкладки с подписками */
 function ProfileFollowingsController() {
     BaseController.call(this);
-    document.title = 'Подписки';
+
     var _self = this;
 
     this.templatePath = '/templates/profile_followings.html';
@@ -294,8 +310,12 @@ function ProfileFollowingsController() {
     this.noDataText = 'Пользователи отсутствуют.';
 
     Users.getFollowings(RegExp.$1, function(followingsList) {
-        _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
         _self.loadTemplate(_self.templatePath, function(template) {
+            _self.spinner.style.display = 'none';
+            document.title = 'Подписки';
+            _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
             _self.viewContainer.innerHTML = _self.parseTemplate(template, {
                 userId: RegExp.$1
             });
@@ -315,13 +335,17 @@ ProfileFollowingsController.prototype = Object.create(BaseController.prototype);
 function ProfileRepositoriesController() {
     BaseController.call(this);
     var _self = this;
-    document.title = 'Репозитории';
+
     this.templatePath = '/templates/profile_repositories.html';
     this.noDataText = 'Репозитории отсутствуют.';
 
     Users.getRepositories(RegExp.$1, function(repositoriesList) {
-        _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
         _self.loadTemplate(_self.templatePath, function(template) {
+            _self.spinner.style.display = 'none';
+            document.title = 'Репозитории';
+            _self.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
+
             _self.viewContainer.innerHTML = _self.parseTemplate(template, {
                 userId: RegExp.$1
             });
@@ -341,10 +365,13 @@ ProfileRepositoriesController.prototype = Object.create(BaseController.prototype
 function NotFoundController() {
     BaseController.call(this);
     var _self = this;
-    document.title = 'Страница не найдена';
-    _self.currentPageTitle.innerHTML = 'Страница не найдена.';
+
+
     this.templatePath = '/templates/not_found.html';
     _self.loadTemplate(_self.templatePath, function(template) {
+        document.title = 'Страница не найдена';
+        _self.currentPageTitle.innerHTML = 'Страница не найдена.';
+
         _self.viewContainer.innerHTML = template;
     });
 }
@@ -369,6 +396,8 @@ var Users = (function() {
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
 
             }, false);
@@ -393,10 +422,11 @@ var Users = (function() {
             xhr.open('GET', 'https://api.github.com/user/' + userId + '?access_token=2eff9755ad1b7dc9d2426d1ebc69bd4cf5358aa6', true);
             xhr.send(null);
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
+                } else if (response.status == 404) {
+                    //ничего не найдено
                 }
 
             }, false);
@@ -421,11 +451,13 @@ var Users = (function() {
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
+
             }, false);
 
             xhr.addEventListener('error', function(event) {
@@ -447,12 +479,14 @@ var Users = (function() {
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
 
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
+
             }, false);
 
             xhr.addEventListener('error', function(event) {
@@ -474,12 +508,15 @@ var Users = (function() {
             xhr.send(null);
 
             xhr.addEventListener('load', function(event) {
-                spinner.style.display = "none";
+
                 var response = event.target;
                 if (response.status == 200) {
                     callback(JSON.parse(response.responseText));
 
+                } else if (response.status == 404) {
+                    // ничего не найдено
                 }
+
             }, false);
 
 
