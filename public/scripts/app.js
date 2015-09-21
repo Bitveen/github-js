@@ -12,7 +12,6 @@ var Application = (function() {
 })();
 
 var StateManager = (function() {
-
     var currentState = null;
     var states = [
         {
@@ -175,7 +174,7 @@ function SearchController() {
     var _self = this;
     document.title = 'Поиск пользователей';
     this.templatePath = '/templates/search.html';
-
+    this.currentPageTitle.innerHTML = StateManager.getCurrentState().Title;
     _self.loadTemplate(_self.templatePath, function(template) {
         _self.viewContainer.innerHTML = template;
         var searchArea        = document.getElementById('searchArea');

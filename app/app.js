@@ -12,7 +12,6 @@ var Application = (function() {
 })();
 
 var StateManager = (function() {
-
     var currentState = null;
     var states = [
         {
