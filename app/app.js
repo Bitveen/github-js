@@ -1,4 +1,5 @@
 'use strict';
+/*  Основной модуль приложения, который запускает стейт хэндлер */
 var Application = (function() {
     return {
         init: function() {
@@ -10,44 +11,50 @@ var Application = (function() {
         }
     };
 })();
+
+/* Для управления состояниями приложения: представления и логика.
+   За логику и биндинг отвечают контроллеры совместно с моделями.
+   Чтобы добавить новую страницу, нужно всего лишь описать ее в массиве states
+*/
 var StateManager = (function() {
     var currentState = null;
     var states = [
         {
-            Name: 'search',
-            Title: 'Поиск пользователей',
-            Pattern: /^#\/$/,
-            Controller: SearchController
+            name: 'search',
+            title: 'Поиск пользователей',
+            pattern: /^#\/$/,
+            controller: SearchController
         },
         {
-            Name: 'profile.main',
-            Title: 'Основная информация',
-            Pattern: /^#\/profile\/([0-9]+)\/main\/?$/,
-            Controller: ProfileMainController
+            name: 'profile.main',
+            title: 'Основная информация',
+            pattern: /^#\/profile\/([0-9]+)\/main\/?$/,
+            controller: ProfileMainController
         },
         {
-            Name: 'profile.followers',
-            Title: 'Подписчики',
-            Pattern: /^#\/profile\/([0-9]+)\/followers\/?$/,
-            Controller: ProfileFollowersController
+            name: 'profile.followers',
+            title: 'Подписчики',
+            pattern: /^#\/profile\/([0-9]+)\/followers\/?$/,
+            controller: ProfileFollowersController
         },
         {
-            Name: 'profile.followings',
-            Title: 'Подписки',
-            Pattern: /^#\/profile\/([0-9]+)\/followings\/?$/,
-            Controller: ProfileFollowingsController
+            name: 'profile.followings',
+            title: 'Подписки',
+            pattern: /^#\/profile\/([0-9]+)\/followings\/?$/,
+            controller: ProfileFollowingsController
         },
         {
-            Name: 'profile.repositories',
-            Title: 'Репозитории',
-            Pattern: /^#\/profile\/([0-9]+)\/repositories\/?$/,
-            Controller: ProfileRepositoriesController
+            name: 'profile.repositories',
+            title: 'Репозитории',
+            pattern: /^#\/profile\/([0-9]+)\/repositories\/?$/,
+            controller: ProfileRepositoriesController
         }
     ];
+
     // определение текущего стейта из доступных по хэшу
     var setCurrentState = function() {
         for (var i = 0; i < states.length; i++) {
-            if (states[i].Pattern.test(location.hash)) {
+            if (states[i].pattern.test(location.hash)) {
                 currentState = states[i];
                 break;
             }
@@ -57,7 +64,7 @@ var StateManager = (function() {
     var stateHandler = function() {
         setCurrentState();
         if (currentState) {
-            new currentState.Controller(currentState);
+            new currentState.controller(currentState);
         } else {
             new NotFoundController();
         }
@@ -75,9 +82,6 @@ var StateManager = (function() {
             return currentState;
         }
     };
-
-
-
 })();
 
 window.addEventListener('load', function(event) {

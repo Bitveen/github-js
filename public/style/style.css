@@ -65,6 +65,18 @@ html, body {
   font-size: 18px;
 }
 
+.upload-button {
+  display: block;
+  width: 200px;
+  color: #6383A8;
+  text-decoration: none;
+  margin: 0 auto;
+  text-align: center;
+  background-color: #f6f6f6;
+  padding: 10px 0;
+  border-radius: 3px;
+}
+
 .search-form {
   position: relative;
   text-align: center;

@@ -39,6 +39,8 @@ html, body {
     margin-left: 15px;
   }
 }
+
+
 .page-footer {
   position: relative;
   bottom: 0;
@@ -60,6 +62,18 @@ html, body {
   top: 14px;
   font-size: 18px;
 }
+.upload-button {
+  display: block;
+  width: 200px;
+  color: $link-color;
+  text-decoration: none;
+  margin: 0 auto;
+  text-align: center;
+  background-color: $bg-hover-color;
+  padding: 10px 0;
+  border-radius: 3px;
+}
+
 
 @import "search";
 @import "profile";
